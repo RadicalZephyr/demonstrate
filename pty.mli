@@ -9,6 +9,6 @@ val pt_opt : Pt_options.pt_options Ctypes.typ
 val file_desc : UnixLabels.file_descr Ctypes.typ
 
 val openpt : Pt_options.pt_options -> UnixLabels.file_descr
-val grantpt : UnixLabels.file_descr -> bytes
-val ptsname : UnixLabels.file_descr -> int
+val grantpt : UnixLabels.file_descr -> int
+val ptsname : UnixLabels.file_descr -> bytes
 val unlockpt : UnixLabels.file_descr -> int

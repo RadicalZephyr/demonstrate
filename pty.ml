@@ -33,10 +33,10 @@ let openpt =
   foreign "posix_openpt" (pt_opt @-> returning file_desc)
 
 let grantpt =
-  foreign "grantpt" (file_desc @-> returning string)
+  foreign "grantpt" (file_desc @-> returning int)
 
 let ptsname =
-  foreign "ptsname" (file_desc @-> returning int)
+  foreign "ptsname" (file_desc @-> returning string)
 
 let unlockpt =
   foreign "unlockpt" (file_desc @-> returning int)
