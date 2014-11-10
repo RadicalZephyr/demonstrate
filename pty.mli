@@ -12,3 +12,4 @@ val openpt : Pt_options.pt_options -> UnixLabels.file_descr
 val grantpt : UnixLabels.file_descr -> int
 val ptsname : UnixLabels.file_descr -> bytes
 val unlockpt : UnixLabels.file_descr -> int
+val prepare_pt : unit -> UnixLabels.file_descr * string

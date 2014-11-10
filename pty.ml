@@ -40,3 +40,9 @@ let ptsname =
 
 let unlockpt =
   foreign "unlockpt" (file_desc @-> returning int)
+
+let prepare_pt () =
+  let fd = openpt Pt_options.ReadWrite in
+  let _ = grantpt fd in
+  let _ = unlockpt fd in
+  (fd, (ptsname fd))
