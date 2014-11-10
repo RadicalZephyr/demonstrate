@@ -5,24 +5,37 @@ let print_usage () =
   print_string "usage: demonstrate <script> <interpreter> [args...]\n"
 
 
-let demonstrate script interpreter args =
-  let rec demo_rec () =
-    match (In_channel.input_line stdin) with
-    | None -> ()
-    | Some line ->
-       demo_rec ()
-  in
-  demo_rec ()
+let demonstrate script command =
+  (* Setup the pty *)
+
+  (* Then fork and exec the interpreter *)
+  match command with
+  | [] -> assert false (* Should not be able to get here. *)
+  | prog :: _ as args ->
+     let open Unix in
+     match fork () with
+     | `In_the_child   ->
+        never_returns (exec ~prog ~args ~use_path:true ())
+
+     | `In_the_parent cpid ->
+
+        try
+          let _ = waitpid cpid in
+          ()
+        with
+        | Unix_error (err, _, _) ->
+           Out_channel.output_string Out_channel.stderr (error_message err)
+
 
 
 let () =
   match (Array.to_list Sys.argv) with
-  (* If we don't get the right number of arguments, print out the
-  usage message. *)
+  (* If we don't get the right number of arguments, print out the usage
+  message. *)
   | []
   | _ :: []
   | _ :: _ :: [] ->
      print_usage ()
 
-  | _ :: script :: interpreter :: args ->
-       demonstrate script interpreter args
+  | _ :: script :: command ->
+       demonstrate script command
