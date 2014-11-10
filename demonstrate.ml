@@ -4,12 +4,19 @@ open Core.Std
 let print_usage () =
   print_string "usage: demonstrate <script> <interpreter> [args...]\n"
 
-let print_args script interpreter args =
-  printf "Process script: '%s' with interpreter: '%s'\n with args '%s'\n"
-         script interpreter (String.concat args ~sep:", ")
+
+let demonstrate script interpreter args =
+  let rec demo_rec () =
+    match (In_channel.input_line stdin) with
+    | None -> ()
+    | Some line ->
+       demo_rec ()
+  in
+  demo_rec ()
+
 
 let () =
   match (Array.to_list Sys.argv) with
   | [] | _ :: [] | _ :: _ :: [] -> print_usage ()
   | _ :: script :: interpreter :: args ->
-       print_args script interpreter args
+       demonstrate script interpreter args
