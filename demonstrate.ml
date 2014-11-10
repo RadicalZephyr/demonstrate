@@ -4,6 +4,11 @@ open Core.Std
 let print_usage () =
   print_string "usage: demonstrate <script> <interpreter> [args...]\n"
 
+let setup_child_fds slave_name =
+  let open Unix in
+  let fd = openfile (~mode:[O_RDONLY]) slave_name in
+  dup2 ~src:fd ~dst:stdin
+
 
 let demonstrate script command =
   (* Setup the pty *)
@@ -17,6 +22,8 @@ let demonstrate script command =
      match fork () with
      | `In_the_child   ->
         (* Setup the input/output file descriptors *)
+        setup_child_fds slave_name;
+
         never_returns (exec ~prog ~args ~use_path:true ())
 
      | `In_the_parent cpid ->
