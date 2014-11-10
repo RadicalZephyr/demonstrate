@@ -17,6 +17,12 @@ let demonstrate script interpreter args =
 
 let () =
   match (Array.to_list Sys.argv) with
-  | [] | _ :: [] | _ :: _ :: [] -> print_usage ()
+  (* If we don't get the right number of arguments, print out the
+  usage message. *)
+  | []
+  | _ :: []
+  | _ :: _ :: [] ->
+     print_usage ()
+
   | _ :: script :: interpreter :: args ->
        demonstrate script interpreter args
