@@ -9,14 +9,14 @@ module Pt_options = struct
 
     let of_int num =
       match num with
-      | 0 -> ReadWrite
-      | 1 -> NoCTTY
+      | 2 -> ReadWrite
+      | 131072 -> NoCTTY
       | x -> failwith (sprintf "Error, cannot use %d as an option for openpt" x)
 
     let to_int opt =
       match opt with
-      | ReadWrite -> 0
-      | NoCTTY    -> 1
+      | ReadWrite -> 2
+      | NoCTTY    -> 131072
   end
 
 let pt_opt =
