@@ -13,13 +13,20 @@ let demonstrate script command =
   match command with
   | [] -> assert false (* Should not be able to get here. *)
   | prog :: _ as args ->
-     let pid = Unix.fork_exec ~prog ~args ~use_path:true () in
-     try
-       let _ = Unix.waitpid pid in
-       ()
-     with
-     | Unix.Unix_error (err, _, _) ->
-        Out_channel.output_string stderr (Unix.error_message err)
+     let open Unix in
+     match fork () with
+     | `In_the_child   ->
+        (* Setup the input/output file descriptors *)
+        never_returns (exec ~prog ~args ~use_path:true ())
+
+     | `In_the_parent cpid ->
+        (* Do the actual work of feeding lines to the interpreter *)
+        try
+          let _ = waitpid cpid in
+          ()
+        with
+        | Unix_error (err, _, _) ->
+           Out_channel.output_string Out_channel.stderr (error_message err)
 
 
 
