@@ -7,6 +7,7 @@ let print_usage () =
 
 let demonstrate script command =
   (* Setup the pty *)
+  let (master_fd, slave_name) = Pty.prepare_pt () in
 
   (* Then fork and exec the interpreter *)
   match command with
