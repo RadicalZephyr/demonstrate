@@ -3,6 +3,7 @@ open Core.Std
 let setup_child_fds slave_name =
   let open Unix in
   let fd = openfile (~mode:[O_RDWR]) slave_name in
+  Termios.make_term_raw fd;
 
   (* Replace all three *)
   dup2 ~src:fd ~dst:stdin;
