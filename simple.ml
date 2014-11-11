@@ -10,12 +10,12 @@ let setup_child_fds slave_name =
   dup2 ~src:fd ~dst:stderr
 
 let rec echo_serv () =
-  match In_channel.input_line stdin with
-  | None -> ()
-  | Some line ->
-     Out_channel.output_string stdout (sprintf "Got input: '%s'\n" line);
-     Out_channel.flush stdout;
-     echo_serv ()
+  let open Unix in
+  let str = String.create 100 in
+  let read_chars = read stdin ~buf:str in
+  let out_line = sprintf "Got input: '%s'" (String.prefix str read_chars) in
+  let _ = single_write stdout ~buf:out_line in
+  echo_serv ()
 
 let rec echo_read mfd =
   match In_channel.input_line stdin with
@@ -23,8 +23,8 @@ let rec echo_read mfd =
   | Some line ->
      let _ = Unix.single_write mfd ~buf:line in
      let str = String.create 100 in
-     let _ = Unix.read mfd ~buf:str in
-     printf "%s" str;
+     let read_chars = Unix.read mfd ~buf:str in
+     printf "%s" (String.prefix str read_chars);
      echo_read mfd
 
 let dispatch () =
