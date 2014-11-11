@@ -14,7 +14,7 @@ let process master_ostream script_stream =
     match (In_channel.input_line stdin) with
     | None -> ()
     | Some line ->
-       if (String.length line) = 0 then
+       if String.is_empty line then
          begin
            match (In_channel.input_line script_stream) with
            | None -> prompt_rec ()
