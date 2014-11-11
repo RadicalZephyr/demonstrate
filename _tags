@@ -1,0 +1,3 @@
+<*.byte> : linkdep(setctty.o), custom
+<*.native>: linkdep(setctty.o)
+true: debug
