@@ -9,6 +9,23 @@ let setup_child_fds slave_name =
   let fd = openfile (~mode:[O_RDONLY]) slave_name in
   dup2 ~src:fd ~dst:stdin
 
+let process master_ostream script_stream =
+    let rec prompt_rec () =
+    match (In_channel.input_line stdin) with
+    | None ->
+       begin
+         match (In_channel.input_line script_stream) with
+         | None -> prompt_rec ()
+         | Some line ->
+            Out_channel.output_string master_ostream line;
+            prompt_rec ()
+       end
+
+    | Some line ->
+       Out_channel.output_string master_ostream line;
+       prompt_rec ()
+  in
+  prompt_rec ()
 
 let demonstrate script command =
   (* Setup the pty *)
@@ -28,14 +45,15 @@ let demonstrate script command =
 
      | `In_the_parent cpid ->
         (* Do the actual work of feeding lines to the interpreter *)
+        let master_ostream = Unix.out_channel_of_descr master_fd in
+        In_channel.with_file script ~f:(process master_ostream);
+
         try
           let _ = waitpid cpid in
           ()
         with
         | Unix_error (err, _, _) ->
            Out_channel.output_string Out_channel.stderr (error_message err)
-
-
 
 let () =
   match (Array.to_list Sys.argv) with
