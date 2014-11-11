@@ -39,8 +39,7 @@ let process mfd script_stream =
               let _ = Unix.single_write mfd ~buf:line in
               let str = String.create 100 in
               let read_chars = Unix.read mfd ~buf:str in
-              printf "Script: %s\n" (String.prefix str read_chars);
-              Out_channel.flush stdout;
+              printf "Script: %s\n%!" (String.prefix str read_chars);
               prompt_rec ()
          end
        else
@@ -48,8 +47,7 @@ let process mfd script_stream =
            let _ = Unix.single_write mfd ~buf:line in
            let str = String.create 100 in
            let read_chars = Unix.read mfd ~buf:str in
-           printf "Output: %s\n" (String.prefix str read_chars);
-           Out_channel.flush stdout;
+           printf "Output: %s\n%!" (String.prefix str read_chars);
            prompt_rec ()
          end
   in
