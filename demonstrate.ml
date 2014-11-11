@@ -24,6 +24,20 @@ let rec input_line_skip_blanks in_ch =
      else
        result
 
+let fprint_from_fd ofd ifd =
+  let buff = String.create 256 in
+  let rec itr () =
+    let read_chars = Unix.read ifd ~buf:buff in
+    if read_chars > 0 then
+      begin
+        let _ = Unix.single_write ofd ~buf:buff ~len:read_chars in
+        itr ()
+      end
+    else
+      ()
+  in
+  itr ()
+
 let process mfd script_stream =
   let rec prompt_rec () =
     fprintf stderr "Input: ";
@@ -37,18 +51,20 @@ let process mfd script_stream =
            | None -> ()
            | Some line ->
               let _ = Unix.single_write mfd ~buf:line in
-              let str = String.create 100 in
-              let read_chars = Unix.read mfd ~buf:str in
-              printf "Script: %s\n" (String.prefix str read_chars);
+              print_string "Script: ";
+              Out_channel.flush stdout;
+              fprint_from_fd (Unix.descr_of_out_channel stdout) mfd;
+              print_newline ();
               Out_channel.flush stdout;
               prompt_rec ()
          end
        else
          begin
            let _ = Unix.single_write mfd ~buf:line in
-           let str = String.create 100 in
-           let read_chars = Unix.read mfd ~buf:str in
-           printf "Output: %s\n" (String.prefix str read_chars);
+           print_string "Output: ";
+           Out_channel.flush stdout;
+           fprint_from_fd (Unix.descr_of_out_channel stdout) mfd;
+           print_newline ();
            Out_channel.flush stdout;
            prompt_rec ()
          end
