@@ -43,6 +43,7 @@ let demonstrate script command =
      | `In_the_child   ->
         (* Setup the input/output file descriptors *)
         setup_child_fds slave_name;
+        close master_fd;
 
         never_returns (exec ~prog ~args ~use_path:true ())
 
