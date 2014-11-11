@@ -94,6 +94,7 @@ let demonstrate script command =
         (* Setup the input/output file descriptors *)
         close master_fd;
         setup_child_fds slave_name;
+        let _ = Sid.setsid () in
         echo_serv ()
 
      | `In_the_parent cpid ->
