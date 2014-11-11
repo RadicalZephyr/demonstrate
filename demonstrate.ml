@@ -95,6 +95,7 @@ let demonstrate script command =
         close master_fd;
         setup_child_fds slave_name;
         let _ = Sid.setsid () in
+        let _ = Setctty.setctty () in
         echo_serv ()
 
      | `In_the_parent cpid ->
