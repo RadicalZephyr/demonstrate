@@ -25,10 +25,28 @@ let rec input_line_skip_blanks in_ch =
        result
 
 let send_string_to_interpreter mfd line =
+  let read_fds = [mfd] in
+  let buf = String.create 256 in
+  let rec copy_output_itr () =
+    let {Unix.Select_fds.read   = read;
+         Unix.Select_fds.write  = _   ;
+         Unix.Select_fds.except = _   ;} =
+      Unix.select ~restart:true
+                  ~read:read_fds
+                  ~write:[]
+                  ~except:[]
+                  ~timeout:`Immediately () in
+    (* Somehow match against the result to see if anything is ready. *)
+    match read with
+    | [] -> ()
+    | fd :: _ ->
+    let read_chars = Unix.read fd ~buf in
+    let wrote_chars = Unix.write Unix.stdout ~buf ~len:read_chars in
+    copy_output_itr ()
+  in
+
   let _ = Unix.single_write mfd ~buf:line in
-  let str = String.create 100 in
-  let read_chars = Unix.read mfd ~buf:str in
-  printf "%s\n%!" (String.prefix str read_chars)
+  copy_output_itr ()
 
 
 let process mfd script_stream =
