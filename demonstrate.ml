@@ -35,7 +35,7 @@ let send_string_to_interpreter mfd line =
                   ~read:read_fds
                   ~write:[]
                   ~except:[]
-                  ~timeout:`Immediately () in
+                  ~timeout:(`After 0.1) () in
     (* Somehow match against the result to see if anything is ready. *)
     match read with
     | [] -> ()
@@ -76,7 +76,7 @@ let rec echo_serv () =
   let open Unix in
   let str = String.create 100 in
   let read_chars = read stdin ~buf:str in
-  let out_line = sprintf "Got input: '%s'" (String.prefix str read_chars) in
+  let out_line = sprintf "Got input: '%s'\n" (String.prefix str read_chars) in
   let _ = single_write stdout ~buf:out_line in
   echo_serv ()
 
