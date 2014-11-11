@@ -27,10 +27,14 @@ let rec input_line_skip_blanks in_ch =
 let fprint_from_fd ofd ifd =
   let buf = String.create 256 in
   let rec itr () =
+    printf "Starting itr\n%!";
     let len = Unix.read ifd ~buf in
+    printf "Read len %d bytes\n%!" len;
     if len > 0 then
       begin
-        let _ = Unix.single_write ofd ~buf ~len in
+        printf "Starting write\n%!";
+        let lenw = Unix.single_write ofd ~buf ~len in
+        printf "Wrote len %d bytes\n%!" lenw;
         itr ()
       end
     else
