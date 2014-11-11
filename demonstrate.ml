@@ -7,41 +7,52 @@ let print_usage () =
 let setup_child_fds slave_name =
   let open Unix in
   let fd = openfile (~mode:[O_RDWR]) slave_name in
+  Termios.make_term_raw fd;
 
   (* Replace all three *)
   dup2 ~src:fd ~dst:stdin;
   dup2 ~src:fd ~dst:stdout;
-  dup2 ~src:fd ~dst:stderr
+  dup2 ~src:fd ~dst:stderr;
+  close fd
 
-let process master_ostream script_stream =
-    let rec prompt_rec () =
+let process mfd script_stream =
+  let rec prompt_rec () =
+    fprintf stderr "Input: ";
+    Out_channel.flush stderr;
     match (In_channel.input_line stdin) with
     | None -> ()
     | Some line ->
        if String.is_empty line then
          begin
            match (In_channel.input_line script_stream) with
-           | None -> prompt_rec ()
+           | None -> ()
            | Some line ->
-              Out_channel.output_string master_ostream line;
-              Out_channel.flush master_ostream;
+              let _ = Unix.single_write mfd ~buf:line in
+              let str = String.create 100 in
+              let read_chars = Unix.read mfd ~buf:str in
+              printf "Script: %s\n" (String.prefix str read_chars);
+              Out_channel.flush stdout;
               prompt_rec ()
          end
        else
          begin
-           Out_channel.output_string master_ostream line;
+           let _ = Unix.single_write mfd ~buf:line in
+           let str = String.create 100 in
+           let read_chars = Unix.read mfd ~buf:str in
+           printf "Output: %s\n" (String.prefix str read_chars);
+           Out_channel.flush stdout;
            prompt_rec ()
          end
   in
   prompt_rec ()
 
 let rec echo_serv () =
-  match In_channel.input_line stdin with
-  | None -> ()
-  | Some line ->
-     Out_channel.output_string stdout (sprintf "Got input: '%s'\n" line);
-     Out_channel.flush stdout;
-     echo_serv ()
+  let open Unix in
+  let str = String.create 100 in
+  let read_chars = read stdin ~buf:str in
+  let out_line = sprintf "Got input: '%s'" (String.prefix str read_chars) in
+  let _ = single_write stdout ~buf:out_line in
+  echo_serv ()
 
 let demonstrate script command =
   (* Setup the pty *)
@@ -61,9 +72,7 @@ let demonstrate script command =
 
      | `In_the_parent cpid ->
         (* Do the actual work of feeding lines to the interpreter *)
-        let master_ostream = Unix.out_channel_of_descr master_fd in
-        In_channel.with_file script ~f:(process master_ostream);
-
+        In_channel.with_file script ~f:(process master_fd);
         try
           let _ = waitpid cpid in
           ()
