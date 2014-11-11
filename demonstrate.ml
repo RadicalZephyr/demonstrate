@@ -24,6 +24,13 @@ let rec input_line_skip_blanks in_ch =
      else
        result
 
+let send_string_to_interpreter mfd line output_prefix =
+  let _ = Unix.single_write mfd ~buf:line in
+  let str = String.create 100 in
+  let read_chars = Unix.read mfd ~buf:str in
+  printf "%s: %s\n%!" output_prefix (String.prefix str read_chars)
+
+
 let process mfd script_stream =
   let rec prompt_rec () =
     fprintf stderr "Input: ";
@@ -36,18 +43,12 @@ let process mfd script_stream =
            match input_line_skip_blanks script_stream with
            | None -> prompt_rec ()
            | Some line ->
-              let _ = Unix.single_write mfd ~buf:line in
-              let str = String.create 100 in
-              let read_chars = Unix.read mfd ~buf:str in
-              printf "Script: %s\n%!" (String.prefix str read_chars);
+              send_string_to_interpreter mfd line "Script";
               prompt_rec ()
          end
        else
          begin
-           let _ = Unix.single_write mfd ~buf:line in
-           let str = String.create 100 in
-           let read_chars = Unix.read mfd ~buf:str in
-           printf "Output: %s\n%!" (String.prefix str read_chars);
+           send_string_to_interpreter mfd line "Output";
            prompt_rec ()
          end
   in
