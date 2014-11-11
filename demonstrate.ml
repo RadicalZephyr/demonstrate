@@ -51,21 +51,17 @@ let process mfd script_stream =
            | None -> ()
            | Some line ->
               let _ = Unix.single_write mfd ~buf:line in
-              print_string "Script: ";
-              Out_channel.flush stdout;
-              fprint_from_fd (Unix.descr_of_out_channel stdout) mfd;
-              print_newline ();
-              Out_channel.flush stdout;
+              let _ = Unix.single_write Unix.stdout ~buf:"Script: " in
+              fprint_from_fd    Unix.stdout mfd;
+              let _ = Unix.single_write Unix.stdout ~buf:"\n" in
               prompt_rec ()
          end
        else
          begin
            let _ = Unix.single_write mfd ~buf:line in
-           print_string "Output: ";
-           Out_channel.flush stdout;
-           fprint_from_fd (Unix.descr_of_out_channel stdout) mfd;
-           print_newline ();
-           Out_channel.flush stdout;
+           let _ = Unix.single_write Unix.stdout ~buf:"Output: " in
+           fprint_from_fd    Unix.stdout mfd;
+           let _ = Unix.single_write Unix.stdout ~buf:"\n" in
            prompt_rec ()
          end
   in
