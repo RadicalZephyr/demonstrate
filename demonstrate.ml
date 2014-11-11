@@ -24,6 +24,7 @@ let process master_ostream script_stream =
            | None -> prompt_rec ()
            | Some line ->
               Out_channel.output_string master_ostream line;
+              Out_channel.flush master_ostream;
               prompt_rec ()
          end
        else
@@ -33,6 +34,14 @@ let process master_ostream script_stream =
          end
   in
   prompt_rec ()
+
+let rec echo_serv () =
+  match In_channel.input_line stdin with
+  | None -> ()
+  | Some line ->
+     Out_channel.output_string stdout (sprintf "Got input: '%s'\n" line);
+     Out_channel.flush stdout;
+     echo_serv ()
 
 let demonstrate script command =
   (* Setup the pty *)
@@ -46,10 +55,9 @@ let demonstrate script command =
      match fork () with
      | `In_the_child   ->
         (* Setup the input/output file descriptors *)
-        setup_child_fds slave_name;
         close master_fd;
-
-        never_returns (exec ~prog ~args ~use_path:true ())
+        setup_child_fds slave_name;
+        echo_serv ()
 
      | `In_the_parent cpid ->
         (* Do the actual work of feeding lines to the interpreter *)
