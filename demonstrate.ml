@@ -6,8 +6,12 @@ let print_usage () =
 
 let setup_child_fds slave_name =
   let open Unix in
-  let fd = openfile (~mode:[O_RDONLY]) slave_name in
-  dup2 ~src:fd ~dst:stdin
+  let fd = openfile (~mode:[O_RDWR]) slave_name in
+
+  (* Replace all three *)
+  dup2 ~src:fd ~dst:stdin;
+  dup2 ~src:fd ~dst:stdout;
+  dup2 ~src:fd ~dst:stderr
 
 let process master_ostream script_stream =
     let rec prompt_rec () =
