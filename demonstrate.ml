@@ -52,8 +52,7 @@ let send_string_to_interpreter mfd line =
 
 let process mfd script_stream =
   let rec prompt_rec () =
-    fprintf stderr "Input: ";
-    Out_channel.flush stderr;
+    copy_from_fd mfd;
     match (In_channel.input_line stdin) with
     | None -> ()
     | Some line ->
