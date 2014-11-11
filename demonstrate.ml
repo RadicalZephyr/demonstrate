@@ -25,12 +25,12 @@ let rec input_line_skip_blanks in_ch =
        result
 
 let fprint_from_fd ofd ifd =
-  let buff = String.create 256 in
+  let buf = String.create 256 in
   let rec itr () =
-    let read_chars = Unix.read ifd ~buf:buff in
-    if read_chars > 0 then
+    let len = Unix.read ifd ~buf in
+    if len > 0 then
       begin
-        let _ = Unix.single_write ofd ~buf:buff ~len:read_chars in
+        let _ = Unix.single_write ofd ~buf ~len in
         itr ()
       end
     else
