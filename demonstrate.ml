@@ -34,7 +34,7 @@ let process mfd script_stream =
        if String.is_empty line then
          begin
            match input_line_skip_blanks script_stream with
-           | None -> ()
+           | None -> prompt_rec ()
            | Some line ->
               let _ = Unix.single_write mfd ~buf:line in
               let str = String.create 100 in
