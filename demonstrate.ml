@@ -12,18 +12,21 @@ let setup_child_fds slave_name =
 let process master_ostream script_stream =
     let rec prompt_rec () =
     match (In_channel.input_line stdin) with
-    | None ->
-       begin
-         match (In_channel.input_line script_stream) with
-         | None -> prompt_rec ()
-         | Some line ->
-            Out_channel.output_string master_ostream line;
-            prompt_rec ()
-       end
-
+    | None -> ()
     | Some line ->
-       Out_channel.output_string master_ostream line;
-       prompt_rec ()
+       if (String.length line) = 0 then
+         begin
+           match (In_channel.input_line script_stream) with
+           | None -> prompt_rec ()
+           | Some line ->
+              Out_channel.output_string master_ostream line;
+              prompt_rec ()
+         end
+       else
+         begin
+           Out_channel.output_string master_ostream line;
+           prompt_rec ()
+         end
   in
   prompt_rec ()
 
