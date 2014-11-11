@@ -19,13 +19,16 @@ let rec echo_serv () =
   echo_serv ()
 
 let rec echo_read mfd =
+  fprintf stderr "Input: ";
+  Out_channel.flush stderr;
   match In_channel.input_line stdin with
   | None -> ()
   | Some line ->
      let _ = Unix.single_write mfd ~buf:line in
      let str = String.create 100 in
      let read_chars = Unix.read mfd ~buf:str in
-     printf "%s" (String.prefix str read_chars);
+     printf "%s\n" (String.prefix str read_chars);
+     Out_channel.flush stdout;
      echo_read mfd
 
 let dispatch () =
