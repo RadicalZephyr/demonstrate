@@ -72,14 +72,6 @@ let process mfd script_stream =
   in
   prompt_rec ()
 
-let rec echo_serv () =
-  let open Unix in
-  let str = String.create 100 in
-  let read_chars = read stdin ~buf:str in
-  let out_line = sprintf "Got input: '%s'\n" (String.prefix str read_chars) in
-  let _ = single_write stdout ~buf:out_line in
-  echo_serv ()
-
 let demonstrate script command =
   (* Setup the pty *)
   let (master_fd, slave_name) = Pty.prepare_pt () in
@@ -96,7 +88,7 @@ let demonstrate script command =
         setup_child_fds slave_name;
         let _ = Sid.setsid () in
         let _ = Ioctl.setctty () in
-        echo_serv ()
+        never_returns (exec ~prog ~args ~use_path:true ())
 
      | `In_the_parent cpid ->
         (* Do the actual work of feeding lines to the interpreter *)
