@@ -82,6 +82,7 @@ let demonstrate script command =
      | `In_the_parent cpid ->
         (* Do the actual work of feeding lines to the interpreter *)
         In_channel.with_file script ~f:(process master_fd);
+        close master_fd;
         try
           let _ = waitpid cpid in
           ()
