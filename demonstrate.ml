@@ -24,8 +24,8 @@ let rec input_line_skip_blanks in_ch =
      else
        result
 
-let send_string_to_interpreter mfd line =
-  let read_fds = [mfd] in
+let copy_from_fd fd =
+  let read_fds = [fd] in
   let buf = String.create 256 in
   let rec copy_output_itr () =
     let {Unix.Select_fds.read   = read;
@@ -41,13 +41,14 @@ let send_string_to_interpreter mfd line =
     | [] -> ()
     | fd :: _ ->
     let read_chars = Unix.read fd ~buf in
-    let wrote_chars = Unix.write Unix.stdout ~buf ~len:read_chars in
+    let _ = Unix.write Unix.stdout ~buf ~len:read_chars in
     copy_output_itr ()
   in
-
-  let _ = Unix.single_write mfd ~buf:line in
   copy_output_itr ()
 
+let send_string_to_interpreter mfd line =
+  let _ = Unix.single_write mfd ~buf:line in
+  copy_from_fd mfd
 
 let process mfd script_stream =
   let rec prompt_rec () =
