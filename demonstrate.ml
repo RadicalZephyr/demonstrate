@@ -15,6 +15,15 @@ let setup_child_fds slave_name =
   dup2 ~src:fd ~dst:stderr;
   close fd
 
+let rec input_line_skip_blanks in_ch =
+  match In_channel.input_line in_ch with
+  | None -> None
+  | Some line as result ->
+     if String.is_empty line then
+       input_line_skip_blanks in_ch
+     else
+       result
+
 let process mfd script_stream =
   let rec prompt_rec () =
     fprintf stderr "Input: ";
@@ -24,7 +33,7 @@ let process mfd script_stream =
     | Some line ->
        if String.is_empty line then
          begin
-           match (In_channel.input_line script_stream) with
+           match input_line_skip_blanks script_stream with
            | None -> ()
            | Some line ->
               let _ = Unix.single_write mfd ~buf:line in
