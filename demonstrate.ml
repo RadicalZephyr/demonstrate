@@ -52,7 +52,7 @@ let process mfd script_stream =
            | Some line ->
               let _ = Unix.single_write mfd ~buf:line in
               let _ = Unix.single_write Unix.stdout ~buf:"Script: " in
-              fprint_from_fd    Unix.stdout mfd;
+              fprint_from_fd            Unix.stdout mfd;
               let _ = Unix.single_write Unix.stdout ~buf:"\n" in
               prompt_rec ()
          end
@@ -60,7 +60,7 @@ let process mfd script_stream =
          begin
            let _ = Unix.single_write mfd ~buf:line in
            let _ = Unix.single_write Unix.stdout ~buf:"Output: " in
-           fprint_from_fd    Unix.stdout mfd;
+           fprint_from_fd            Unix.stdout mfd;
            let _ = Unix.single_write Unix.stdout ~buf:"\n" in
            prompt_rec ()
          end
